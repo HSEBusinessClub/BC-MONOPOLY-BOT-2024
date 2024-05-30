@@ -41,8 +41,7 @@ async def start_cmd(message: aiogram_types.Message, state: FSMContext):
     kb = [[aiogram_types.KeyboardButton(text=START_GAME_TEXT)]]
     keyboard = aiogram_types.ReplyKeyboardMarkup(
         keyboard=kb,
-        resize_keyboard=True,
-        input_field_placeholder="форум ждёт!!"
+        resize_keyboard=True
     )
 
     await state.set_state(BotState.in_menu_state)
@@ -56,13 +55,12 @@ async def start_cmd(message: aiogram_types.Message, state: FSMContext):
 
 @dp.message(Command("timeline"))
 async def send_program(message: aiogram_types.Message):
-    image_from_pc = FSInputFile("./text/HSE_Business_Club_2024.pdf")
+    image_from_pc = FSInputFile("./text/program.pdf")
 
     kb = [[aiogram_types.KeyboardButton(text=START_GAME_TEXT)]]
     keyboard = aiogram_types.ReplyKeyboardMarkup(
         keyboard=kb,
-        resize_keyboard=True,
-        input_field_placeholder="форум ждёт!!"
+        resize_keyboard=True
     )
 
     await message.answer_document(
