@@ -14,7 +14,7 @@ from db import init_db, ADD_USER, ADD_NOTE, GET_ALL_USERS as GET_ALL_CHAT_ID
 from state import BotState
 from text.greeting_text import TEXT as HTML_GREETING_TEXT
 from text.start_game_text import TEXT as HTML_START_GAME_TEXT
-from utils import generate_partners_buttons
+from utils import generate_motivating_phrase, generate_partners_buttons
 from text.partners_desc.partners_dict import PARTNERS_DESCRIPTION
 
 load_dotenv(override=True)
@@ -38,18 +38,38 @@ con, cur = init_db()
 @dp.message(Command("start"))
 async def start_cmd(message: aiogram_types.Message, state: FSMContext):
 
-    kb = [[aiogram_types.KeyboardButton(text=MONOPOLY_TEXT)]]
+    kb = [[aiogram_types.KeyboardButton(text=START_GAME_TEXT)]]
     keyboard = aiogram_types.ReplyKeyboardMarkup(
         keyboard=kb,
-        resize_keyboard=True
+        resize_keyboard=True,
+        input_field_placeholder="форум ждёт!!"
     )
 
-    await message.answer(
-        "starting...",
-        reply_markup=keyboard
-    )
     await state.set_state(BotState.in_menu_state)
     await state.set_data(base_user_data)
+    await message.answer(
+        HTML_GREETING_TEXT,
+        parse_mode=ParseMode.HTML,
+        reply_markup=keyboard
+    )
+
+
+@dp.message(Command("timeline"))
+async def send_program(message: aiogram_types.Message):
+    image_from_pc = FSInputFile("./text/HSE_Business_Club_2024.pdf")
+
+    kb = [[aiogram_types.KeyboardButton(text=START_GAME_TEXT)]]
+    keyboard = aiogram_types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+        input_field_placeholder="форум ждёт!!"
+    )
+
+    await message.answer_document(
+        image_from_pc,
+        caption="Программа форума",
+        reply_markup=keyboard
+    )
 
 
 @dp.message(F.text == SECRET_CODE)
@@ -66,7 +86,6 @@ async def send_message(message: aiogram_types.Message, state: FSMContext):
 
     for current_chat_id in chats_id:
         payload_timer += 1
-        print(current_chat_id)
 
         try:
             await bc_bot.copy_message(int(current_chat_id[0]), message.chat.id, message.message_id)
@@ -74,44 +93,10 @@ async def send_message(message: aiogram_types.Message, state: FSMContext):
             print(e)
 
         if payload_timer % 20 == 0:
-            time.sleep(5)
+            time.sleep(3)
 
     await state.set_state(BotState.in_menu_state)
     await message.answer("Рассылка проведена успешно")
-
-@dp.message(F.text == MONOPOLY_TEXT)
-async def run_desc(message: aiogram_types.Message):
-
-    kb = [[aiogram_types.KeyboardButton(text=START_GAME_TEXT), aiogram_types.KeyboardButton(text=PROGRAM_LIST)]]
-    keyboard = aiogram_types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-        input_field_placeholder="форум ждёт!!"
-    )
-
-    await message.answer(
-        HTML_GREETING_TEXT,
-        parse_mode=ParseMode.HTML,
-        reply_markup=keyboard
-    )
-
-
-@dp.message(F.text == PROGRAM_LIST)
-async def send_program(message: aiogram_types.Message):
-    image_from_pc = FSInputFile("./text/HSE_Business_Club_2024.pdf")
-
-    kb = [[aiogram_types.KeyboardButton(text=START_GAME_TEXT)]]
-    keyboard = aiogram_types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-        input_field_placeholder="форум ждёт!!"
-    )
-
-    await message.answer_document(
-        image_from_pc,
-        caption="Программа форума",
-        reply_markup=keyboard
-    )
 
 
 @dp.message(F.text == START_GAME_TEXT)
@@ -130,6 +115,7 @@ async def start_game(message: aiogram_types.Message, state: FSMContext):
         parse_mode=ParseMode.HTML,
         reply_markup=partners_keyboard
     )
+
 
 @dp.message(
     BotState.playing_state,
@@ -154,6 +140,7 @@ async def choose_partner(message: aiogram_types.Message, state: FSMContext):
         parse_mode=ParseMode.HTML,
         reply_markup=keyboard
     )
+
 
 @dp.message(
     BotState.in_progress_with_partner,
@@ -186,17 +173,15 @@ async def to_partners(message: aiogram_types.Message, state: FSMContext):
     if are_all_done:
         ans_text = "Молодец!! \nПодарки заберешь позже"
     elif message.text == SUCCESS_TEXT:
-        ans_text = "Так держать!" # TODO: add random phrase
+        ans_text = generate_motivating_phrase()
     else:
-        ans_text = "Можешь продолжить"
+        ans_text = "Можешь продолжить позже!"
 
     await message.answer(
         ans_text,
         parse_mode=ParseMode.HTML,
         reply_markup=partners_keyboard
     )
-
-
 
 
 async def main():

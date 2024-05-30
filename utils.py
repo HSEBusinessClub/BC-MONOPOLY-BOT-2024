@@ -1,3 +1,5 @@
+import random
+
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram import types as aiogram_types
@@ -21,3 +23,11 @@ async def generate_partners_buttons(state: FSMContext):
     )
 
     return keyboard
+
+def generate_motivating_phrase():
+    l = ["Не останавливайся на достигнутом!", "Продолжай двигаться вперёд, несмотря ни на что!",
+         "Каждый шаг приближает тебя к цели!", "Верь в себя и продолжай идти!",
+         "Возможности есть всегда, продолжай искать их!", "Ты можешь больше, чем думаешь!",
+         "Твоя жизнь — в твоих руках, продолжай строить её!", "Успех требует усилий, продолжай работать над собой!",
+         "Ты можешь всё, продолжай верить в себя!" ]
+    return l[random.randint(0, len(l)-1)]
